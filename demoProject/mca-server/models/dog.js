@@ -1,4 +1,4 @@
-const dogData = [{ name: 'Masha', age: 9 }, { name: 'Clifford', age: 14 }]
+const { init } = require('../initdb')
 
 class Dog {
   constructor(data) {
@@ -10,7 +10,10 @@ class Dog {
   static get all() {
     return new Promise(async (resolve, reject) => {
       try {
-        const dogs = dogData.map(d => new Dog(d))
+        const db = await init()
+        const dbData = await db.collection('dogs').find().toArray()
+        const dogs = dbData.map(dog => new Dog(dog))
+
         if (!dogs.length) { throw new Error('No doggos here!') }
         resolve(dogs);
       } catch (err) {

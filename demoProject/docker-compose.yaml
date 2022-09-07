@@ -1,0 +1,40 @@
+version: '3'
+services:
+  api:
+    image: node:14.17.2
+    ports:
+      - 3000:3000
+    environment:
+      - DB_CONNECTION=mongodb://doggos-admin:doggos-pass@db:27017
+      - DB_NAME=doggos
+    volumes:
+      - type: bind
+        source: ./mca-server
+        target: /server
+    working_dir: /server
+    command: bash -c "npm install && npm run dev"
+    depends_on:
+      - db
+
+  client:
+    image: node:16.15.0
+    ports:
+      - 8080:8080
+    volumes:
+      - type: bind
+        source: ./mca-client
+        target: /client
+    working_dir: /client
+    command: bash -c "npm install && npm run dev"
+
+  db:
+    image: mongo
+    environment: 
+      - MONGO_INITDB_ROOT_USERNAME=doggos-admin
+      - MONGO_INITDB_DATABASE=doggos
+      - MONGO_INITDB_ROOT_PASSWORD=doggos-pass
+    volumes:
+      - "dbdata:/var/lib/mongodb/data"
+      - "./db/seed.js:/docker-entrypoint-initdb.d/seed.js:ro"
+volumes:
+  dbdata:
